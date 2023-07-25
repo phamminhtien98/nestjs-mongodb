@@ -20,6 +20,9 @@ export class Categories {
 
   @Prop()
   parent_id?: number;
+
+  @Prop()
+  cate_path?: string;
 }
 export type CategoriesDocument = HydratedDocument<Categories>;
 export const CategoriesModel = SchemaFactory.createForClass(Categories);

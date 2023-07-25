@@ -1,4 +1,6 @@
 export interface IParamsConfig {
+  p?: string; //page
+  cate_path?: string;
   q?: string; //search
   sort_type?: string;
 

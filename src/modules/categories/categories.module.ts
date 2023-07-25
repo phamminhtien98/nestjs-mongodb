@@ -2,7 +2,6 @@ import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { CategoriesModel } from 'src/models/categories.model';
 import { CategoriesController } from 'src/modules/categories/categories.controller';
-import { CategoriesRepository } from 'src/modules/categories/categories.repositories';
 import { CategoriesService } from 'src/modules/categories/categories.service';
 
 @Module({
@@ -12,6 +11,6 @@ import { CategoriesService } from 'src/modules/categories/categories.service';
     ]),
   ],
   controllers: [CategoriesController],
-  providers: [CategoriesService, CategoriesRepository],
+  providers: [CategoriesService],
 })
 export class CategoriesModule {}

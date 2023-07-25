@@ -8,7 +8,7 @@ export class CategoriesController {
 
   @Get()
   async getAllCategories() {
-    const categories = await this.categoriesService.getAllCategories();
+    const categories = await this.categoriesService.findAll();
     return categories;
   }
   @Get('categories-parent')

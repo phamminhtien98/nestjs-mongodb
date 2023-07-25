@@ -1,17 +1,54 @@
 import { Injectable } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
 import { CategoriesDto } from 'src/dto/categories.dto';
 import { Categories } from 'src/models/categories.model';
-import { CategoriesRepository } from 'src/modules/categories/categories.repositories';
 @Injectable()
 export class CategoriesService {
-  constructor(private readonly categoriesRepository: CategoriesRepository) {}
-  async getAllCategories() {
-    return await this.categoriesRepository.findAll();
+  constructor(
+    @InjectModel('categories')
+    private readonly categoriesModel: Model<Categories>,
+  ) {}
+  async insertCategory(category: CategoriesDto): Promise<Categories> {
+    return await new this.categoriesModel(category).save();
   }
-  async insertCategory(category: CategoriesDto) {
-    return await this.categoriesRepository.insertCategory(category);
+
+  async findAll(): Promise<Categories[]> {
+    return await this.categoriesModel.find().exec();
   }
   async findCategoriesParent(): Promise<Categories[]> {
-    return await this.categoriesRepository.findCategoriesParent();
+    return await this.categoriesModel.aggregate([
+      {
+        $match: {
+          parent_id: 2,
+        },
+      },
+      {
+        $lookup: {
+          from: 'categories',
+          let: {
+            parent_id: '$id',
+          },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $eq: ['$$parent_id', '$parent_id'],
+                },
+              },
+            },
+            {
+              $lookup: {
+                from: 'categories',
+                localField: 'id',
+                foreignField: 'parent_id',
+                as: 'sub_category',
+              },
+            },
+          ],
+          as: 'sub_category',
+        },
+      },
+    ]);
   }
 }
