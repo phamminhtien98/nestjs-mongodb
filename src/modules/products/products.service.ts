@@ -5,7 +5,6 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Products } from 'src/models/products.model';
 import { Categories } from 'src/models/categories.model';
-
 @Injectable()
 export class ProductsService {
   constructor(
@@ -35,7 +34,12 @@ export class ProductsService {
 
     //tìm kiếm
     if (params.q) {
-      andOption.push({ name: params.q });
+      andOption.push({
+        name: {
+          $regex: params.q,
+          $options: 'i',
+        },
+      });
     }
 
     //địa điểm
@@ -273,7 +277,22 @@ export class ProductsService {
     if (andOption.length > 0) {
       filters['$and'] = andOption;
     }
-    return await this.productsModel.find(filters);
+
+    let sort: any | null = {};
+    if (params.sort_type === 'vasup_desc') {
+      sort = null;
+    } else if (params.sort_type === 'norder_30_desc') {
+      sort = { order_count: -1 };
+    } else if (params.sort_type === 'real_discount_desc') {
+      sort = { promotion_percentage: -1 };
+    } else if (params.sort_type === 'rating_percent_desc') {
+      sort = { rating_percent: -1 };
+    }
+    return await this.productsModel
+      .find(filters)
+      .skip(params.s && params.p ? params.s * (params.p - 1) : null)
+      .limit(params.s ? params.s : null)
+      .sort(sort);
   }
   async insertProducts(product: ProductsDto) {
     return await new this.productsModel(product).save();
